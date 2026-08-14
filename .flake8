@@ -1,0 +1,3 @@
+[flake8]
+# import * 的报错代码
+ignore = F405
