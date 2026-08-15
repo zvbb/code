@@ -15,6 +15,7 @@ GRAY = GREY_B
 LIGHT_GRAY = GREY_C
 PRIMARY = BLUE
 ACCENT = ORANGE
+SVG_DIR = "material"
 
 
 # ============================================================
@@ -68,65 +69,25 @@ class Group1(VoiceoverScene):
         self._section06()
 
     def _section01(self):
-        # 中央 AI
-        ai = Text(
-            "AI",
-            font_size=100,
-            weight=BOLD,
-            color=PRIMARY
-        )
+        svg = SVGMobject("material/study.svg")
 
-        # 周围的知识方向
-        topics = [
-            ("Machine Learning", UP * 2.5),
-            ("Computer Vision", LEFT * 3.2 + UP * 0.8),
-            ("NLP", RIGHT * 3.2 + UP * 0.8),
-            ("Reinforcement Learning", DOWN * 2.5),
-            ("Robotics", LEFT * 3.2 + DOWN * 1.5),
-            ("Knowledge", RIGHT * 3.2 + DOWN * 1.5),
-        ]
+        # 调整大小
+        svg.scale(2)
 
-        topic_mobs = VGroup()
+        # 放到画面中央
+        svg.move_to(ORIGIN)
 
-        for text, pos in topics:
-
-            mob = Text(
-                text,
-                font_size=28,
-                color=TEXT
-            )
-
-            mob.move_to(pos)
-            topic_mobs.add(mob)
-
-        with self.voiceover(text="如果想系统地学习人工智能，那么第一个问题是：") as tracker:
+        with self.voiceover(text="如果想系统地学习人工智能，那么第一个问题是："):
             self.play(
-                FadeIn(ai, scale=1.5),
+                FadeIn(svg, scale=1.5),
             )
-            # 知识方向逐渐出现
-            self.play(
-                LaggedStart(
-                    *[
-                        FadeIn(m, scale=0.7)
-                        for m in topic_mobs
-                    ],
-                    lag_ratio=0.15
-                )
-            )
-
             # 全部消失
             self.play(
-                FadeOut(topic_mobs),
-                FadeOut(ai),
+                FadeOut(svg),
             )
 
         # 提出问题
-        question = Text(
-            "应该从哪里开始?",
-            font_size=100,
-            weight=BOLD,
-            color=TEXT
-        )
+        question = SVGMobject("material/body/thinking.svg")
 
         with self.voiceover(text="应该从哪里开始?"):
             self.play(
@@ -142,83 +103,57 @@ class Group1(VoiceoverScene):
 
     def _section02(self):
         # 中央 AI
-        ai = Text(
-            "AI",
-            font_size=90,
-            weight=BOLD,
-            color=PRIMARY
-        )
-
+        ai = SVGMobject(f"{SVG_DIR}/ai-brain.svg")
         # 第一圈
         items1 = [
-            ("课程", UP * 2.3),
-            ("博客", LEFT * 3.0),
-            ("论文", RIGHT * 3.0),
-            ("视频", DOWN * 2.3),
+            ("lecture.svg", UP * 2.3),
+            ("blog.svg", LEFT * 3.0),
+            ("paper.svg", RIGHT * 3.0),
+            ("video.svg", DOWN * 2.3),
+            ("github.svg", UP * 3.3 + LEFT * 2.5),
+            ("tool.svg", UP * 3.3 + RIGHT * 2.5),
         ]
 
         mobs1 = VGroup()
 
-        for text, pos in items1:
-            mob = Text(
-                text,
-                font_size=38,
-                color=TEXT
+        for filename, pos in items1:
+            mob = SVGMobject(
+                f"{SVG_DIR}/{filename}"
             )
 
+            mob.scale(0.3)
             mob.move_to(pos)
+
             mobs1.add(mob)
+
         # 第二圈
         items2 = [
-            ("开源模型", UP * 3.3 + LEFT * 2.5),
-            ("开源工具", UP * 3.3 + RIGHT * 2.5),
-            ("RAG", LEFT * 4 + DOWN * 1),
-            ("Agent", RIGHT * 4 + DOWN * 1),
-            ("LLM", DOWN * 3.5 + LEFT * 2),
-            ("Framework", DOWN * 3.5 + RIGHT * 2),
+            ("machine-learning.svg", LEFT * 4 + DOWN * 1),
+            ("open-ai.svg", RIGHT * 4 + DOWN * 1),
         ]
 
         mobs2 = VGroup()
 
-        for text, pos in items2:
-            mob = Text(
-                text,
-                font_size=28,
-                color=TEXT
+        for filename, pos in items2:
+            mob = SVGMobject(
+                f"{SVG_DIR}/{filename}"
             )
 
+            mob.scale(0.4)
             mob.move_to(pos)
+
             mobs2.add(mob)
-
-        # 更多技术
-        more = VGroup(
-            Text("Transformer", font_size=25, color=GRAY),
-            Text("Diffusion", font_size=25, color=GRAY),
-            Text("Embedding", font_size=25, color=GRAY),
-            Text("Vector DB", font_size=25, color=GRAY),
-            Text("Fine-tuning", font_size=25, color=GRAY),
-            Text("Multimodal", font_size=25, color=GRAY),
-        )
-
-        more.arrange_in_grid(
-            rows=2,
-            cols=3,
-            buff=0.6
-        )
-
-        more.move_to(DOWN * 0.2)
 
         # 信息越来越多
         all_items = VGroup(
             ai,
             mobs1,
             mobs2,
-            more
         )
 
         with self.voiceover(text="""今天学习 AI 的门槛已经很低了。
 网上有大量的课程、博客、论文、视频，以及各种开源模型和工具。
-我们很容易学会如何调用模型、搭建 RAG，甚至训练神经网络。但信息越多，也越容易陷入碎片化。"""):
+"""):
             self.play(
                 FadeIn(ai, scale=1.4),
                 run_time=0.8
@@ -228,15 +163,20 @@ class Group1(VoiceoverScene):
             self.play(
                 LaggedStart(
                     *[
-                        FadeIn(m, scale=0.7)
+                        AnimationGroup(
+                            FadeIn(m, scale=0.7),
+                            m.animate.scale(1.5),
+                            m.animate.scale(1 / 1.5),
+                            lag_ratio=1  # 0.3 的时间用来 FadeIn，0.3 放大，0.3 恢复
+                        )
                         for m in mobs1
                     ],
-                    lag_ratio=0.15
+                    lag_ratio=1
                 ),
-                run_time=1.5
+                run_time=6
             )
-            self.wait(2)
 
+        with self.voiceover("我们很容易学会如何调用模型，甚至训练神经网络。但信息越多，也越容易陷入碎片化。"):
             self.play(
                 LaggedStart(
                     *[
@@ -245,22 +185,8 @@ class Group1(VoiceoverScene):
                     ],
                     lag_ratio=0.1
                 ),
-                run_time=2
+                run_time=3
             )
-
-            self.wait(2)
-
-            self.play(
-                LaggedStart(
-                    *[
-                        FadeIn(m, scale=0.5)
-                        for m in more
-                    ],
-                    lag_ratio=0.08
-                ),
-                run_time=1.5
-            )
-
             self.play(
                 all_items.animate.scale(0.7),
                 run_time=1
@@ -272,7 +198,7 @@ class Group1(VoiceoverScene):
         # 第一幕：脑袋 + 零散的 AI 概念
         # ============================================================
 
-        brain = ImageMobject("img/brain.png")
+        brain = SVGMobject("material/body/brain.svg")
         brain.scale(0.8)
         brain.move_to(ORIGIN)
 
@@ -522,318 +448,83 @@ class Group1(VoiceoverScene):
 
     def _section_04(self):
         with self.voiceover(text="""用整体性的思维，对抗信息的碎片化。"""):
-            # =========================
-            # 颜色
-            # =========================
-            dark = "#333333"
-            blue = "#4A90E2"
-            light_blue = "#DCEEFF"
+            # ========== 左侧：电脑零件（碎片化） ==========
+            cpu = SVGMobject("material/computer/cpu.svg").scale(0.5)
+            gpu = SVGMobject("material/computer/gpu.svg").scale(0.5)
+            mainboard = SVGMobject(
+                "material/computer/mainboard.svg").scale(0.5)
+            keyboard = SVGMobject("material/computer/keyboard.svg").scale(0.5)
+            mouse = SVGMobject("material/computer/mouse.svg").scale(0.5)
 
-            # =========================
-            # 创建机甲零件
-            # =========================
-
-            # 头
-            head = VGroup(
-                RoundedRectangle(
-                    width=1.15,
-                    height=0.8,
-                    corner_radius=0.12,
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-                Circle(
-                    radius=0.09,
-                    color=blue,
-                    fill_opacity=1,
-                ).shift(LEFT * 0.22),
-                Circle(
-                    radius=0.09,
-                    color=blue,
-                    fill_opacity=1,
-                ).shift(RIGHT * 0.22),
-            )
-
-            # 身体
-            body = VGroup(
-                Polygon(
-                    [-0.75, 0.75, 0],
-                    [0.75, 0.75, 0],
-                    [0.6, -0.75, 0],
-                    [-0.6, -0.75, 0],
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-                Line(
-                    LEFT * 0.4,
-                    RIGHT * 0.4,
-                    color=blue,
-                    stroke_width=5,
-                ),
-            )
-
-            # 肩膀
-            left_shoulder = Circle(
-                radius=0.22,
-                color=dark,
-                fill_color=light_blue,
-                fill_opacity=1,
-                stroke_width=4,
-            )
-
-            right_shoulder = Circle(
-                radius=0.22,
-                color=dark,
-                fill_color=light_blue,
-                fill_opacity=1,
-                stroke_width=4,
-            )
-
-            # 左臂
-            left_arm = VGroup(
-                RoundedRectangle(
-                    width=0.42,
-                    height=1.15,
-                    corner_radius=0.08,
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-                Circle(
-                    radius=0.16,
-                    color=dark,
-                    fill_color=WHITE,
-                    fill_opacity=1,
-                    stroke_width=3,
-                ),
-            )
-
-            # 右臂
-            right_arm = VGroup(
-                RoundedRectangle(
-                    width=0.42,
-                    height=1.15,
-                    corner_radius=0.08,
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-                Circle(
-                    radius=0.16,
-                    color=dark,
-                    fill_color=WHITE,
-                    fill_opacity=1,
-                    stroke_width=3,
-                ),
-            )
-
-            # 左腿
-            left_leg = VGroup(
-                RoundedRectangle(
-                    width=0.48,
-                    height=1.25,
-                    corner_radius=0.08,
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-                Polygon(
-                    [-0.3, -0.55, 0],
-                    [0.3, -0.55, 0],
-                    [0.42, -0.95, 0],
-                    [-0.42, -0.95, 0],
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-            )
-
-            # 右腿
-            right_leg = VGroup(
-                RoundedRectangle(
-                    width=0.48,
-                    height=1.25,
-                    corner_radius=0.08,
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-                Polygon(
-                    [-0.3, -0.55, 0],
-                    [0.3, -0.55, 0],
-                    [0.42, -0.95, 0],
-                    [-0.42, -0.95, 0],
-                    stroke_color=dark,
-                    stroke_width=4,
-                    fill_color=light_blue,
-                    fill_opacity=1,
-                ),
-            )
-
-            # =========================
-            # 统一缩放
-            # =========================
-
-            for part in [
-                head,
-                body,
-                left_arm,
-                right_arm,
-                left_leg,
-                right_leg,
-            ]:
-                part.scale(0.9)
-
-            # =========================
-            # 中央最终位置
-            # =========================
-
-            center = ORIGIN
-
-            head_target = center + UP * 2.15
-            body_target = center + UP * 0.55
-
-            left_shoulder_target = center + LEFT * 1.05 + UP * 1.15
-            right_shoulder_target = center + RIGHT * 1.05 + UP * 1.15
-
-            left_arm_target = center + LEFT * 1.35 + UP * 0.25
-            right_arm_target = center + RIGHT * 1.35 + UP * 0.25
-
-            left_leg_target = center + LEFT * 0.42 + DOWN * 1.0
-            right_leg_target = center + RIGHT * 0.42 + DOWN * 1.0
-
-            # =========================
-            # 初始：零件散落在整个画面
-            # =========================
-
-            head.move_to(LEFT * 4.5 + UP * 2.5)
-            head.rotate(-PI / 5)
-
-            body.move_to(RIGHT * 4.3 + DOWN * 1.5)
-            body.rotate(PI / 7)
-
-            left_shoulder.move_to(LEFT * 2.2 + DOWN * 2.5)
-
-            right_shoulder.move_to(RIGHT * 3.8 + UP * 2.3)
-
-            left_arm.move_to(LEFT * 4.5 + UP * 0.2)
-            left_arm.rotate(PI / 3)
-
-            right_arm.move_to(RIGHT * 4.5 + DOWN * 0.5)
-            right_arm.rotate(-PI / 3)
-
-            left_leg.move_to(LEFT * 1.8 + DOWN * 3.0)
-            left_leg.rotate(-PI / 5)
-
-            right_leg.move_to(RIGHT * 1.8 + UP * 2.8)
-            right_leg.rotate(PI / 4)
-
+            # 排列成两列散落感
             parts = VGroup(
-                head,
-                body,
-                left_shoulder,
-                right_shoulder,
-                left_arm,
-                right_arm,
-                left_leg,
-                right_leg,
+                cpu.shift(LEFT * 3.5 + UP * 2.2),
+                gpu.shift(LEFT * 3.5 + UP * 0.8),
+                mainboard.shift(LEFT * 3.5 + DOWN * 0.6),
+                keyboard.shift(LEFT * 1.8 + UP * 1.5),
+                mouse.shift(LEFT * 1.8 + UP * 0.1)
             )
 
-            # =========================
-            # 第一阶段：碎片出现
-            # =========================
+            parts_label = Text("碎片化", font_size=32, color=BLUE).next_to(
+                parts, DOWN, buff=0.6)
 
+            # ========== 右侧：完整电脑（整体性） ==========
+            computer = SVGMobject(
+                "material/computer/computer.svg").scale(0.8).shift(RIGHT * 3.5)
+            computer_label = Text("整体性", font_size=32, color=GREEN).next_to(
+                computer, DOWN, buff=0.6)
+
+            # ========== 中间：VS ==========
+            vs = SVGMobject("material/vs.svg").scale(0.2)
+
+            # ========== 播放动画 ==========
+            # 全部淡入，左右同时出现
             self.play(
-                LaggedStart(
-                    *[
-                        FadeIn(part, shift=UP * 0.15)
-                        for part in parts
-                    ],
-                    lag_ratio=0.08,
-                ),
-                run_time=1.2,
+                FadeIn(parts, shift=UP),
+                FadeIn(parts_label, shift=UP),
+                FadeIn(computer, shift=DOWN),
+                FadeIn(computer_label, shift=DOWN),
+                FadeIn(vs, scale=0.5)
             )
 
-            self.wait(0.5)
-
-            # =========================
-            # 第二阶段：
-            # 所有碎片向中央汇聚
-            # =========================
-
+            # 左右对抗动画：交替闪烁+向外扩张
+            # 左侧亮起
             self.play(
-                head.animate
-                    .move_to(head_target)
-                    .rotate(PI / 5),
-
-                body.animate
-                    .move_to(body_target)
-                    .rotate(-PI / 7),
-
-                left_shoulder.animate
-                    .move_to(left_shoulder_target),
-
-                right_shoulder.animate
-                    .move_to(right_shoulder_target),
-
-                left_arm.animate
-                    .move_to(left_arm_target)
-                    .rotate(-PI / 3),
-
-                right_arm.animate
-                    .move_to(right_arm_target)
-                    .rotate(PI / 3),
-
-                left_leg.animate
-                    .move_to(left_leg_target)
-                    .rotate(PI / 5),
-
-                right_leg.animate
-                    .move_to(right_leg_target)
-                    .rotate(-PI / 4),
-
-                run_time=2.2,
-                rate_func=smooth,
+                parts.animate.set_color(YELLOW),
+                parts_label.animate.set_color(YELLOW),
+                parts.animate.shift(LEFT * 0.2),
+                run_time=0.8
             )
-
-            self.wait(0.5)
-
-            # =========================
-            # 第三阶段：
-            # 整体轻微强调
-            # =========================
-
-            robot = VGroup(
-                head,
-                body,
-                left_shoulder,
-                right_shoulder,
-                left_arm,
-                right_arm,
-                left_leg,
-                right_leg,
-            )
-
             self.play(
-                robot.animate.scale(1.05),
-                run_time=0.3,
+                parts.animate.set_color(WHITE),
+                parts_label.animate.set_color(BLUE),
+                parts.animate.shift(RIGHT * 0.2),
+                run_time=0.8
             )
 
+            # 右侧亮起
             self.play(
-                robot.animate.scale(1 / 1.05),
-                run_time=0.3,
+                computer.animate.set_color(YELLOW),
+                computer_label.animate.set_color(YELLOW),
+                computer.animate.shift(RIGHT * 0.2),
+                run_time=0.8
+            )
+            self.play(
+                computer.animate.set_color(WHITE),
+                computer_label.animate.set_color(GREEN),
+                computer.animate.shift(LEFT * 0.2),
+                run_time=0.8
             )
 
-            self.wait(1)
+            # VS 放大强调
+            self.play(
+                vs.animate.scale(1.5),
+                run_time=0.5
+            )
+            self.play(
+                vs.animate.scale(1 / 1.5),
+                run_time=0.5
+            )
         self.clear()
 
     def _section05(self):
@@ -1146,8 +837,6 @@ class Group1(VoiceoverScene):
                 old_man.animate.shift(
                     RIGHT * 0.45 + UP * 0.25
                 ),
-
-                run_time=2.0,
                 rate_func=smooth,
             )
 
@@ -1165,8 +854,6 @@ class Group1(VoiceoverScene):
                 run_time=1.2,
                 rate_func=smooth,
             )
-
-            self.wait(0.6)
 
             # =====================================================
             # 10. 第二步
@@ -1182,8 +869,6 @@ class Group1(VoiceoverScene):
                     PI / 12,
                     about_point=front_leg.get_start(),
                 ),
-
-                run_time=1.5,
                 rate_func=smooth,
             )
 
@@ -1191,8 +876,6 @@ class Group1(VoiceoverScene):
                 old_man.animate.shift(
                     RIGHT * 0.45 + UP * 0.25
                 ),
-
-                run_time=2.0,
                 rate_func=smooth,
             )
 
@@ -1206,8 +889,6 @@ class Group1(VoiceoverScene):
                     -PI / 12,
                     about_point=front_leg.get_start(),
                 ),
-
-                run_time=1.2,
                 rate_func=smooth,
             )
         self.clear()
@@ -1223,7 +904,7 @@ class Group1(VoiceoverScene):
 
         long_term = Text(
             "长期的理解能力",
-            font="Microsoft YaHei",
+            font="FangSong",
             font_size=52,
             color=DARK,
         )
@@ -1238,7 +919,7 @@ class Group1(VoiceoverScene):
 
         speed = Text(
             "学习速度",
-            font="Microsoft YaHei",
+            font="FangSong",
             font_size=52,
             color=GRAY,
         )
@@ -1290,12 +971,7 @@ class Group1(VoiceoverScene):
         # 只显示文字，不加任何图形
         # =========================================================
 
-        unchanging = Text(
-            "以不变应万变",
-            font="Microsoft YaHei",
-            font_size=68,
-            color=DARK,
-        )
+        unchanging = SVGMobject("material/body/yoga.svg")
         unchanging.move_to(ORIGIN)
         with self.voiceover(text="""而 AI 尤其适合这种学习方式——具体的模型和技术会不断变化，
                             但背后的问题、思想和方法却具有更强的稳定性。"""):
@@ -1319,17 +995,17 @@ class Group1(VoiceoverScene):
 
             self.wait(0.8)
 
-            self.play(
-                FadeOut(unchanging),
-                run_time=0.6,
-            )
+        self.play(
+            FadeOut(unchanging),
+            run_time=0.6,
+        )
         # =========================================================
         # 3. 慢 = 快
         # =========================================================
 
         slow = Text(
             "慢",
-            font="Microsoft YaHei",
+            font="FangSong",
             font_size=82,
             color=GRAY,
         )
@@ -1344,7 +1020,7 @@ class Group1(VoiceoverScene):
 
         fast = Text(
             "快",
-            font="Microsoft YaHei",
+            font="FangSong",
             font_size=82,
             color=BLUE,
         )
@@ -1398,7 +1074,7 @@ class Group1(VoiceoverScene):
         # 将 AIMA_cover.png 放到当前 py 文件同目录
         # =========================================================
 
-        cover = ImageMobject("img/aima.jpg")
+        cover = ImageMobject("material/aima.jpg")
 
         # 根据实际封面比例调整
         cover.height = 5.6
@@ -1451,41 +1127,4 @@ class Group1(VoiceoverScene):
     # ================================================================
 
     def make_book(self):
-
-        cover = RoundedRectangle(
-            width=2.0,
-            height=3.0,
-            corner_radius=0.12,
-            stroke_width=3,
-            color=BLACK,
-            fill_color=WHITE,
-            fill_opacity=1,
-        )
-
-        title = Text(
-            "人工智能",
-            font="FangSong",
-            font_size=28,
-            color=BLACK,
-        )
-
-        subtitle = Text(
-            "权威教材",
-            font="FangSong",
-            font_size=20,
-            color=GRAY,
-        )
-
-        title.move_to(
-            cover.get_center() + UP * 0.35
-        )
-
-        subtitle.move_to(
-            cover.get_center() + DOWN * 0.35
-        )
-
-        return VGroup(
-            cover,
-            title,
-            subtitle
-        )
+        return SVGMobject("material/textbook.svg")

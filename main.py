@@ -1,81 +1,84 @@
 from manim import *
 
 
-class AIResources(Scene):
+class FragmentationVsHolism(Scene):
     def construct(self):
-        self.camera.background_color = WHITE
+        # ========== 左侧：电脑零件（碎片化） ==========
+        cpu = SVGMobject("material/computer/cpu.svg").scale(0.7)
+        gpu = SVGMobject("material/computer/gpu.svg").scale(0.7)
+        mainboard = SVGMobject("material/computer/mainboard.svg").scale(0.7)
+        keyboard = SVGMobject("material/computer/keyboard.svg").scale(0.7)
+        mouse = SVGMobject("material/computer/mouse.svg").scale(0.7)
 
-        # =========================
-        # 1. 中央的 AI
-        # =========================
-        ai = Text(
-            "AI",
-            font_size=96,
-            color=BLACK,
+        # 排列成两列散落感
+        parts = VGroup(
+            cpu.shift(LEFT * 3.5 + UP * 2.2),
+            gpu.shift(LEFT * 3.5 + UP * 0.8),
+            mainboard.shift(LEFT * 3.5 + DOWN * 0.6),
+            keyboard.shift(LEFT * 1.8 + UP * 1.5),
+            mouse.shift(LEFT * 1.8 + UP * 0.1)
         )
 
+        parts_label = Text("碎片化", font_size=32, color=BLUE).next_to(
+            parts, DOWN, buff=0.6)
+
+        # ========== 右侧：完整电脑（整体性） ==========
+        computer = SVGMobject(
+            "material/computer/computer.svg").scale(0.8).shift(RIGHT * 3.5)
+        computer_label = Text("整体性", font_size=32, color=GREEN).next_to(
+            computer, DOWN, buff=0.6)
+
+        # ========== 中间：VS ==========
+        vs = SVGMobject("material/vs.svg")
+
+        # ========== 播放动画 ==========
+        # 全部淡入，左右同时出现
         self.play(
-            FadeIn(ai, scale=0.5),
-            run_time=0.8,
+            FadeIn(parts, shift=UP),
+            FadeIn(parts_label, shift=UP),
+            FadeIn(computer, shift=DOWN),
+            FadeIn(computer_label, shift=DOWN),
+            FadeIn(vs, scale=0.5)
+        )
+        self.wait(2)
+
+        # 左右对抗动画：交替闪烁+向外扩张
+        # 左侧亮起
+        self.play(
+            parts.animate.set_color(YELLOW),
+            parts_label.animate.set_color(YELLOW),
+            parts.animate.shift(LEFT * 0.2),
+            run_time=0.8
+        )
+        self.play(
+            parts.animate.set_color(WHITE),
+            parts_label.animate.set_color(BLUE),
+            parts.animate.shift(RIGHT * 0.2),
+            run_time=0.8
         )
 
-        self.wait(0.5)
-
-        # =========================
-        # 2. 周围的资源
-        # =========================
-        resources = [
-            ("📚", "课程", UP * 2.7 + LEFT * 3.5),
-            ("📝", "博客", LEFT * 5 + UP * 0.5),
-            ("📄", "论文", RIGHT * 4.5 + UP * 1.5),
-            ("▶", "视频", RIGHT * 5 + DOWN * 1.0),
-            ("🤖", "开源模型", LEFT * 3.8 + DOWN * 2.5),
-            ("🔧", "工具", RIGHT * 1.5 + DOWN * 2.8),
-            ("💻", "开源项目", DOWN * 3.5),
-        ]
-
-        icons = VGroup()
-        labels = VGroup()
-
-        # =========================
-        # 3. 一个一个出现
-        # =========================
-        for icon_text, label_text, position in resources:
-
-            icon = Text(
-                icon_text,
-                font_size=48,
-            )
-
-            label = Text(
-                label_text,
-                font_size=28,
-            )
-
-            group = VGroup(icon, label)
-            group.arrange(DOWN, buff=0.15)
-            group.move_to(position)
-
-            icons.add(icon)
-            labels.add(label)
-
-            # 从 AI 附近飞到最终位置
-            group.move_to(ai.get_center())
-
-            self.play(
-                FadeIn(group, scale=0.3),
-                group.animate.move_to(position),
-                run_time=0.6,
-            )
-
-        self.wait(1)
-
-        # =========================
-        # 4. 中央 AI 淡出
-        # =========================
+        # 右侧亮起
         self.play(
-            FadeOut(ai),
-            run_time=1,
+            computer.animate.set_color(YELLOW),
+            computer_label.animate.set_color(YELLOW),
+            computer.animate.shift(RIGHT * 0.2),
+            run_time=0.8
+        )
+        self.play(
+            computer.animate.set_color(WHITE),
+            computer_label.animate.set_color(GREEN),
+            computer.animate.shift(LEFT * 0.2),
+            run_time=0.8
+        )
+
+        # VS 放大强调
+        self.play(
+            vs.animate.scale(1.5),
+            run_time=0.5
+        )
+        self.play(
+            vs.animate.scale(1 / 1.5),
+            run_time=0.5
         )
 
         self.wait(2)
